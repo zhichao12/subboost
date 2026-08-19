@@ -430,9 +430,71 @@ html.light [class*="text-white/70"] { color: #475569 !important; }
 html.light [class*="text-white/80"] { color: #334155 !important; }
 html.light [class*="text-white/90"] { color: #0f172a !important; }
 
-html.light [class*="bg-black/"] { background-color: rgba(255, 255, 255, 0.86) !important; }
+html.light [class*="bg-black/"] { background-color: rgba(255, 255, 255, 0.9) !important; }
 html.light [class*="bg-white/"] { background-color: rgba(15, 23, 42, 0.045) !important; }
 html.light [class*="border-white/"] { border-color: rgba(148, 163, 184, 0.45) !important; }
+
+/* 固定深色表面：Card、菜单、弹层与页脚不能只依赖透明白色映射。 */
+html.light [class~="bg-[#141414]"],
+html.light [class~="bg-[#1a1a1a]"],
+html.light [class~="bg-zinc-950/95"],
+html.light [class~="bg-dark-50/80"],
+html.light [class~="bg-dark-100"],
+html.light [class~="bg-dark-100/95"] {
+  background-color: #ffffff !important;
+}
+
+html.light [class~="bg-dark-200"],
+html.light [class~="bg-white/5"] {
+  background-color: #f8fafc !important;
+}
+
+html.light [class~="bg-white/10"] {
+  background-color: #f1f5f9 !important;
+}
+
+html.light [class~="border-dark-300"] {
+  border-color: #cbd5e1 !important;
+}
+
+html.light [class~="text-dark-800"],
+html.light [class~="text-dark-900"] {
+  color: #0f172a !important;
+}
+
+html.light [class~="text-dark-500"],
+html.light [class~="text-dark-600"] {
+  color: #64748b !important;
+}
+
+/* 有色操作按钮需要保留浅色文字，不能被通用 text-white 覆盖规则改暗。 */
+html.light [class*="bg-primary-"][class~="text-white"],
+html.light [class*="bg-red-"][class~="text-white"],
+html.light [class*="bg-indigo-"][class~="text-white"] {
+  color: #ffffff !important;
+}
+
+html.light input,
+html.light textarea,
+html.light select {
+  color-scheme: light;
+}
+
+html.light input,
+html.light textarea,
+html.light select,
+html.light input::-webkit-datetime-edit,
+html.light input::-webkit-datetime-edit-fields-wrapper,
+html.light input::-webkit-date-and-time-value {
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+}
+
+html.light input::placeholder,
+html.light textarea::placeholder {
+  color: #94a3b8 !important;
+  -webkit-text-fill-color: #94a3b8 !important;
+}
 
 html.light .text-gradient {
   background-image: linear-gradient(to right, #0f172a, #475569, #64748b);
