@@ -621,40 +621,38 @@ html.light .subboost-tabs-trigger[data-state="active"] {
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
 }
 
-html.light .subboost-button[data-variant="default"] {
+html.light .subboost-button[class*="bg-primary-"] {
   border-color: #a5b4fc;
   background: #e0e7ff;
   color: #3730a3 !important;
 }
 
-html.light .subboost-button[data-variant="default"]:hover {
+html.light .subboost-button[class*="bg-primary-"]:hover {
   border-color: #818cf8;
   background: #c7d2fe;
   color: #312e81 !important;
 }
 
-html.light .subboost-button[data-variant="outline"],
-html.light .subboost-button[data-variant="secondary"],
-html.light .subboost-button[data-variant="ghost"] {
+html.light .subboost-button[class*="bg-white/5"],
+html.light .subboost-button[class*="text-white/60"] {
   border-color: #cbd5e1;
   background: #ffffff;
   color: #334155 !important;
 }
 
-html.light .subboost-button[data-variant="outline"]:hover,
-html.light .subboost-button[data-variant="secondary"]:hover,
-html.light .subboost-button[data-variant="ghost"]:hover {
+html.light .subboost-button[class*="bg-white/5"]:hover,
+html.light .subboost-button[class*="text-white/60"]:hover {
   background: #f1f5f9;
   color: #0f172a !important;
 }
 
-html.light .subboost-button[data-variant="destructive"] {
+html.light .subboost-button[class*="bg-red-"] {
   border-color: #fca5a5;
   background: #fee2e2;
   color: #b91c1c !important;
 }
 
-html.light .subboost-button[data-variant="destructive"]:hover {
+html.light .subboost-button[class*="bg-red-"]:hover {
   border-color: #f87171;
   background: #fecaca;
   color: #991b1b !important;
