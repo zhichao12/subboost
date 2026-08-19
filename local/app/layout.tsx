@@ -1,4 +1,3 @@
-import Script from "next/script";
 import type { Metadata } from "next";
 import "@subboost/ui/styles/globals.css";
 import { Footer } from "@subboost/ui/components/layout/footer";
@@ -41,13 +40,16 @@ export const viewport = {
 
 const themeBootstrapScript = `(() => {
   try {
-    const saved = localStorage.getItem("subboost-theme");
-    const theme = saved === "light" || saved === "dark"
-      ? saved
-      : window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
-    document.documentElement.classList.remove("light", "dark");
-    document.documentElement.classList.add(theme);
-    document.documentElement.style.colorScheme = theme;
+    const stored = localStorage.getItem("subboost-theme");
+    const preference = stored === "light" || stored === "dark" || stored === "system" ? stored : "system";
+    const theme = preference === "system"
+      ? window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"
+      : preference;
+    const root = document.documentElement;
+    root.classList.remove("light", "dark");
+    root.classList.add(theme);
+    root.dataset.themePreference = preference;
+    root.style.colorScheme = theme;
   } catch {}
 })();`;
 
@@ -55,11 +57,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const { buildVersion } = resolveAppVersionInfo({ env: process.env, cwd: process.cwd() });
 
   return (
-    <html lang="zh-CN" className="dark">
+    <html lang="zh-CN" suppressHydrationWarning>
       <head>
-        <Script id="subboost-theme-bootstrap" strategy="beforeInteractive">
-          {themeBootstrapScript}
-        </Script>
+        <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />
       </head>
       <body className="font-sans">
         <ScrollLockStabilizer />
