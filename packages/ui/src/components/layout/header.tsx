@@ -140,7 +140,7 @@ export function Header({
                 height={36}
                 className="rounded-xl shadow-lg shadow-blue-500/25 transition-shadow group-hover:shadow-blue-500/40"
               />
-              <span className="hidden text-xl font-bold leading-none bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent sm:inline-flex">
+              <span className="subboost-brand-title hidden text-xl font-bold leading-none sm:inline-flex">
                 SubBoost
               </span>
             </Link>

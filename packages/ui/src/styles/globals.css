@@ -576,3 +576,86 @@ html.light .stat-card { background: #ffffff; border-color: #e2e8f0; }
 html.light ::-webkit-scrollbar-track { background: #f8fafc; }
 html.light ::-webkit-scrollbar-thumb { background: #cbd5e1; }
 html.light ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* 交互组件使用明确的语义 class，避免 Tailwind 工具类顺序影响亮色对比度。 */
+.subboost-brand-title,
+.subboost-hero-title {
+  background: linear-gradient(90deg, #ffffff, rgba(255, 255, 255, 0.6));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+html.light .subboost-brand-title,
+html.light .subboost-hero-title {
+  background: linear-gradient(90deg, #0f172a, #475569);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+html.light .subboost-editing-badge {
+  border-color: #c7d2fe;
+  background: #eef2ff;
+  color: #3730a3;
+}
+
+html.light .subboost-protocol-badge {
+  border-color: #99f6e4;
+  background: #ecfdf5;
+  color: #047857;
+}
+
+html.light .subboost-tabs-list {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+html.light .subboost-tabs-trigger {
+  color: #64748b;
+}
+
+html.light .subboost-tabs-trigger[data-state="active"] {
+  background: #ffffff;
+  color: #0f172a;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
+}
+
+html.light .subboost-button[data-variant="default"] {
+  border-color: #a5b4fc;
+  background: #e0e7ff;
+  color: #3730a3 !important;
+}
+
+html.light .subboost-button[data-variant="default"]:hover {
+  border-color: #818cf8;
+  background: #c7d2fe;
+  color: #312e81 !important;
+}
+
+html.light .subboost-button[data-variant="outline"],
+html.light .subboost-button[data-variant="secondary"],
+html.light .subboost-button[data-variant="ghost"] {
+  border-color: #cbd5e1;
+  background: #ffffff;
+  color: #334155 !important;
+}
+
+html.light .subboost-button[data-variant="outline"]:hover,
+html.light .subboost-button[data-variant="secondary"]:hover,
+html.light .subboost-button[data-variant="ghost"]:hover {
+  background: #f1f5f9;
+  color: #0f172a !important;
+}
+
+html.light .subboost-button[data-variant="destructive"] {
+  border-color: #fca5a5;
+  background: #fee2e2;
+  color: #b91c1c !important;
+}
+
+html.light .subboost-button[data-variant="destructive"]:hover {
+  border-color: #f87171;
+  background: #fecaca;
+  color: #991b1b !important;
+}
