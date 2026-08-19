@@ -423,6 +423,51 @@ html.light [class*="text-white/"] {
   color: #0f172a !important;
 }
 
+/* 交互工具类携带伪类前缀，不会被上面的静态 class 匹配到。 */
+html.light [class*="hover:text-white"]:hover,
+html.light [class*="focus:text-white"]:focus,
+html.light [class*="group-hover:text-white"] {
+  color: #0f172a !important;
+}
+
+html.light [class*="hover:bg-white/"]:hover,
+html.light [class*="focus:bg-white/"]:focus {
+  background-color: #e2e8f0 !important;
+}
+
+/* 深色主题的浅色状态文字在白底上对比度不足，映射为可读的语义色。 */
+html.light [class*="text-primary-200"],
+html.light [class*="text-indigo-200"],
+html.light [class*="text-indigo-300"] { color: #4338ca !important; }
+html.light [class*="text-green-300"],
+html.light [class*="text-green-400"],
+html.light [class*="text-emerald-100"],
+html.light [class*="text-emerald-300"],
+html.light [class*="text-emerald-400"] { color: #15803d !important; }
+html.light [class*="text-sky-100"],
+html.light [class*="text-sky-200"],
+html.light [class*="text-sky-300"] { color: #0369a1 !important; }
+html.light [class*="text-amber-100"],
+html.light [class*="text-amber-200"],
+html.light [class*="text-amber-300"],
+html.light [class*="text-yellow-300"] { color: #92400e !important; }
+html.light [class*="text-red-200"],
+html.light [class*="text-red-300"] { color: #b91c1c !important; }
+html.light [class*="text-orange-200"],
+html.light [class*="text-orange-300"] { color: #c2410c !important; }
+
+/* Header 与首页标题使用的是 Tailwind 渐变，而非 .text-gradient。 */
+html.light [class~="from-white"] {
+  --tw-gradient-from: #0f172a var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgba(15, 23, 42, 0) var(--tw-gradient-to-position) !important;
+}
+html.light [class~="via-white"] {
+  --tw-gradient-via: #334155 var(--tw-gradient-via-position) !important;
+}
+html.light [class~="to-white/60"] {
+  --tw-gradient-to: #64748b var(--tw-gradient-to-position) !important;
+}
+
 html.light [class*="text-white/40"] { color: #94a3b8 !important; }
 html.light [class*="text-white/45"] { color: #94a3b8 !important; }
 html.light [class*="text-white/60"] { color: #64748b !important; }
