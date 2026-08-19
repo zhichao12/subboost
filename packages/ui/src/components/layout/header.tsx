@@ -106,10 +106,12 @@ export function Header({
   mode = "default",
   extraBrandBadge = null,
   privilegedMenuItem,
+  rightAccessory,
 }: {
   mode?: HeaderMode;
   extraBrandBadge?: HeaderBrandBadge | null;
   privilegedMenuItem?: AccountMenuItem;
+  rightAccessory?: React.ReactNode;
 }) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
@@ -186,6 +188,8 @@ export function Header({
 
           {/* Right Side Actions */}
           <div className="flex items-center gap-2">
+            {rightAccessory}
+
             {/* User Menu */}
             <UserMenu privilegedMenuItem={privilegedMenuItem} />
 

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Header, type HeaderBrandBadge } from "@subboost/ui/components/layout/header";
+import { ThemeToggle } from "@local/components/theme-toggle";
 
 type LatestReleaseStatus = {
   hasUpdate?: unknown;
@@ -60,5 +61,5 @@ export function LocalHeader() {
     };
   }, []);
 
-  return <Header mode="local" extraBrandBadge={newReleaseBadge} />;
+  return <Header mode="local" extraBrandBadge={newReleaseBadge} rightAccessory={<ThemeToggle />} />;
 }

@@ -1,3 +1,4 @@
+import Script from "next/script";
 import type { Metadata } from "next";
 import "@subboost/ui/styles/globals.css";
 import { Footer } from "@subboost/ui/components/layout/footer";
@@ -38,11 +39,28 @@ export const viewport = {
   themeColor: SUBBOOST_THEME_COLOR,
 };
 
+const themeBootstrapScript = `(() => {
+  try {
+    const saved = localStorage.getItem("subboost-theme");
+    const theme = saved === "light" || saved === "dark"
+      ? saved
+      : window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+    document.documentElement.classList.remove("light", "dark");
+    document.documentElement.classList.add(theme);
+    document.documentElement.style.colorScheme = theme;
+  } catch {}
+})();`;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const { buildVersion } = resolveAppVersionInfo({ env: process.env, cwd: process.cwd() });
 
   return (
     <html lang="zh-CN" className="dark">
+      <head>
+        <Script id="subboost-theme-bootstrap" strategy="beforeInteractive">
+          {themeBootstrapScript}
+        </Script>
+      </head>
       <body className="font-sans">
         <ScrollLockStabilizer />
         <div className="min-h-screen bg-gradient-radial flex flex-col">
