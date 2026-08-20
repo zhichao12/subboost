@@ -53,7 +53,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
-            APP_RELEASE_VERSION=2.7.0-theme
+            APP_RELEASE_VERSION=2.7.0
             APP_BUILD_SHA=${{ github.sha }}
             APP_VERSION=2.7.0-theme
             APP_VERSION_TOKEN=${{ github.sha }}
