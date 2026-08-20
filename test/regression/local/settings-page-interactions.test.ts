@@ -145,6 +145,110 @@ describe("local source-import settings interactions", () => {
     });
   });
 
+  it.each([
+    [
+      "reports that the Fork already matches upstream",
+      { currentVersion: "2.7.0", latestVersion: "2.7.0", latestTag: "v2.7.0", hasUpdate: false, releaseUrl: null },
+      "已是官方最新版本：当前 2.7.0，上游 v2.7.0。",
+    ],
+    [
+      "reports an upstream release that needs a Fork sync",
+      { currentVersion: "2.7.0", latestVersion: "2.8.0", latestTag: "v2.8.0", hasUpdate: true, releaseUrl: "https://example.com/release" },
+      "发现官方新版本：v2.8.0。请先同步 Fork 并等待镜像构建完成。",
+    ],
+    [
+      "falls back to a version number when an upstream tag is unavailable",
+      { currentVersion: "2.7.0", latestVersion: "2.8.0", latestTag: null, hasUpdate: true, releaseUrl: null },
+      "发现官方新版本：2.8.0。请先同步 Fork 并等待镜像构建完成。",
+    ],
+    [
+      "uses a generic label when the upstream release has no version fields",
+      { currentVersion: "2.7.0", latestVersion: null, latestTag: null, hasUpdate: true, releaseUrl: null },
+      "发现官方新版本：新版本。请先同步 Fork 并等待镜像构建完成。",
+    ],
+    [
+      "reports an unknown current version without hiding the upstream result",
+      { currentVersion: null, latestVersion: "2.7.0", latestTag: "v2.7.0", hasUpdate: false, releaseUrl: null },
+      "已是官方最新版本：当前 未识别，上游 v2.7.0。",
+    ],
+    [
+      "reports that the upstream version is temporarily unavailable",
+      { currentVersion: "2.7.0", latestVersion: null, latestTag: null, hasUpdate: false, releaseUrl: null },
+      "暂时无法获取官方版本信息，请稍后重试。",
+    ],
+  ])("%s when checking updates", async (_label, releaseStatus, expectedMessage) => {
+    harness.userState.user = {
+      username: "admin",
+      subscriptionCount: 1,
+      quota: { maxSubscriptions: 9 },
+    };
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => {
+      if (url === "/api/settings/source-import") return response({ allowUnsafeSubscriptionSources: false });
+      if (url === "/api/releases/latest") return response(releaseStatus);
+      return response(updateStatus());
+    }));
+
+    const view = renderSettings();
+    await flushPromises();
+    await buttonWithText(view.buttons, "检查更新")?.onClick();
+    await flushPromises();
+
+    expect(view.setters[9]).toHaveBeenLastCalledWith(expectedMessage);
+    expect(view.setters[10]).toHaveBeenNthCalledWith(1, true);
+    expect(view.setters[10]).toHaveBeenLastCalledWith(false);
+  });
+
+  it("shows a visible failure after an update check cannot be completed", async () => {
+    harness.userState.user = {
+      username: "admin",
+      subscriptionCount: 1,
+      quota: { maxSubscriptions: 9 },
+    };
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => {
+      if (url === "/api/settings/source-import") return response({ allowUnsafeSubscriptionSources: false });
+      throw new Error(`failed to fetch ${url}`);
+    }));
+
+    const view = renderSettings();
+    await flushPromises();
+    await buttonWithText(view.buttons, "检查更新")?.onClick();
+    await flushPromises();
+
+    expect(view.setters[8]).toHaveBeenLastCalledWith("检查更新失败，请稍后重试");
+    expect(view.setters[9]).toHaveBeenLastCalledWith(null);
+  });
+
+  it("renders visible update-check progress and result text", () => {
+    harness.userState.user = {
+      username: "admin",
+      subscriptionCount: 1,
+      quota: { maxSubscriptions: 9 },
+    };
+    vi.stubGlobal("fetch", vi.fn(async () => response({ allowUnsafeSubscriptionSources: false })));
+
+    const completed = renderSettings({
+      4: { currentVersion: "2.7.0", latestVersion: "2.7.0", latestTag: "v2.7.0", hasUpdate: false, releaseUrl: null },
+      5: updateStatus(),
+      6: false,
+      7: false,
+      8: null,
+      9: "已是官方最新版本：当前 2.7.0，上游 v2.7.0。",
+      10: false,
+    });
+    expect(completed.html).toContain("已是官方最新版本：当前 2.7.0，上游 v2.7.0。");
+
+    const checking = renderSettings({
+      4: { currentVersion: "2.7.0", latestVersion: "2.7.0", latestTag: "v2.7.0", hasUpdate: false, releaseUrl: null },
+      5: updateStatus(),
+      6: false,
+      7: false,
+      8: null,
+      9: null,
+      10: true,
+    });
+    expect(checking.html).toContain("正在检查官方版本...");
+  });
+
   it("loads application update status and submits a signed update request", async () => {
     harness.userState.user = {
       username: "admin",
