@@ -138,6 +138,7 @@ describe("SubscriptionLinkDialog", () => {
     expect(html).toContain("生成订阅链接");
     expect(html).toContain("更新时智能匹配节点");
     expect(html).toContain("启用自动更新");
+    expect(html).toContain("已启用");
     expect(html).toContain("自动更新间隔");
     expect(html).toContain("注意事项");
     expect(html).toContain("订阅链接相当于访问凭证，请勿公开分享");
@@ -183,6 +184,19 @@ describe("SubscriptionLinkDialog", () => {
 
     expect(baseProps.handleCopyUrl).toHaveBeenCalled();
     expect(baseProps.onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it("clearly labels disabled switches", () => {
+    const html = renderToStaticMarkup(
+      React.createElement(SubscriptionLinkDialog, {
+        ...baseProps,
+        autoUpdateEnabled: false,
+        smartNodeMatchingEnabled: false,
+      })
+    );
+
+    expect(html).toContain("已关闭");
+    expect(html).not.toContain("自动更新间隔");
   });
 
   it("disables link creation while name is empty or a request is running", () => {

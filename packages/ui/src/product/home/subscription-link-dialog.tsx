@@ -102,11 +102,22 @@ export function SubscriptionLinkDialog({
                     <SmartNodeMatchingHelp enabled={smartNodeMatchingEnabled} />
                   </div>
                 </div>
-                <Switch
-                  checked={smartNodeMatchingEnabled}
-                  onCheckedChange={setSmartNodeMatchingEnabled}
-                  aria-label="更新时智能匹配节点"
-                />
+                <div className="flex shrink-0 items-center gap-3">
+                  <span
+                    className={
+                      smartNodeMatchingEnabled
+                        ? "rounded-full bg-primary-100 px-2 py-0.5 text-xs font-semibold text-primary-700 dark:bg-primary-500/20 dark:text-primary-200"
+                        : "rounded-full bg-slate-200 px-2 py-0.5 text-xs font-semibold text-slate-600 dark:bg-white/10 dark:text-white/60"
+                    }
+                  >
+                    {smartNodeMatchingEnabled ? "已启用" : "已关闭"}
+                  </span>
+                  <Switch
+                    checked={smartNodeMatchingEnabled}
+                    onCheckedChange={setSmartNodeMatchingEnabled}
+                    aria-label="更新时智能匹配节点"
+                  />
+                </div>
               </div>
 
               <div className="my-3 border-t border-white/10" />
