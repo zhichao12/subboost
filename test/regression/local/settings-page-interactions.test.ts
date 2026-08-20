@@ -110,6 +110,21 @@ function renderSettings(overrides: Record<number, unknown> = {}) {
   }
 }
 
+function buttonWithText(buttons: Array<Record<string, any>>, text: string) {
+  return buttons.find((button) => JSON.stringify(button.children).includes(text));
+}
+
+function updateStatus(state: "idle" | "applying" | "succeeded" | "failed" = "idle") {
+  return {
+    available: true,
+    currentBuildSha: "1234567",
+    state,
+    targetBuildSha: state === "idle" ? null : "abcdef0",
+    message: state === "failed" ? "更新失败" : state === "succeeded" ? "应用更新完成" : "等待更新",
+    updatedAt: "2026-08-20T00:00:00.000Z",
+  };
+}
+
 async function flushPromises() {
   for (let index = 0; index < 8; index += 1) await Promise.resolve();
 }
@@ -123,7 +138,113 @@ describe("local source-import settings interactions", () => {
       logout: vi.fn(async () => undefined),
       user: null,
     };
-    vi.stubGlobal("window", { location: { href: "" } });
+    vi.stubGlobal("window", {
+      clearInterval: vi.fn(),
+      location: { href: "" },
+      setInterval: vi.fn(() => 1),
+    });
+  });
+
+  it("loads application update status and submits a signed update request", async () => {
+    harness.userState.user = {
+      username: "admin",
+      subscriptionCount: 1,
+      quota: { maxSubscriptions: 9 },
+    };
+    const fetchMock = vi.fn(async (url: string) => {
+      if (url === "/api/settings/source-import") return response({ allowUnsafeSubscriptionSources: false });
+      if (url === "/api/releases/latest") {
+        return response({ currentVersion: "2.7.0", latestVersion: "2.7.0", hasUpdate: false, releaseUrl: null });
+      }
+      if (url === "/api/app-update") return response(updateStatus());
+      return response(updateStatus("applying"));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const view = renderSettings();
+    await flushPromises();
+    buttonWithText(view.buttons, "应用已构建更新")?.onClick();
+    await flushPromises();
+
+    expect(fetchMock).toHaveBeenCalledWith("/api/releases/latest", { cache: "no-store" });
+    expect(fetchMock).toHaveBeenCalledWith("/api/app-update", expect.objectContaining({ method: "POST" }));
+  });
+
+  it("renders upstream and updater states", () => {
+    harness.userState.user = {
+      username: "admin",
+      subscriptionCount: 1,
+      quota: { maxSubscriptions: 9 },
+    };
+    vi.stubGlobal("fetch", vi.fn(async () => response({ allowUnsafeSubscriptionSources: false })));
+
+    const upstream = renderSettings({
+      4: { currentVersion: "2.7.0", latestVersion: "2.8.0", hasUpdate: true, releaseUrl: "https://example.com/release" },
+      5: updateStatus("idle"),
+      6: false,
+      7: false,
+      8: null,
+    });
+    expect(upstream.html).toContain("官方已发布 2.8.0");
+    expect(upstream.html).toContain("同步 Fork");
+
+    const failed = renderSettings({
+      4: { currentVersion: "2.7.0", latestVersion: "2.7.0", hasUpdate: false, releaseUrl: null },
+      5: updateStatus("failed"),
+      6: false,
+      7: false,
+      8: "请求失败",
+    });
+    expect(failed.html).toContain("更新失败");
+    expect(failed.html).toContain("请求失败");
+
+    const applying = renderSettings({
+      4: { currentVersion: "2.7.0", latestVersion: "2.7.0", hasUpdate: false, releaseUrl: null },
+      5: updateStatus("applying"),
+      6: false,
+      7: false,
+      8: null,
+    });
+    expect(applying.html).toContain("正在应用");
+
+    const succeeded = renderSettings({
+      4: { currentVersion: "2.7.0", latestVersion: "2.7.0", hasUpdate: false, releaseUrl: null },
+      5: updateStatus("succeeded"),
+      6: false,
+      7: false,
+      8: null,
+    });
+    expect(succeeded.html).toContain("应用更新完成");
+    expect(succeeded.html).toContain("已完成");
+
+    const unavailable = renderSettings({
+      4: null,
+      5: { available: false, state: "idle", message: null, requestedAt: null, completedAt: null, currentBuildSha: null, targetBuildSha: null },
+      6: false,
+      7: false,
+      8: null,
+    });
+    expect(unavailable.html).toContain("未识别");
+    expect(unavailable.html).toContain("当前 Fork 基于官方稳定版 -。");
+
+    const fallbacks = renderSettings({
+      4: { currentVersion: "2.7.0", latestVersion: null, latestTag: null, releaseUrl: null, hasUpdate: true },
+      5: { available: true, state: "succeeded", message: null, requestedAt: null, completedAt: null, currentBuildSha: null, targetBuildSha: null },
+      6: false,
+      7: false,
+      8: null,
+    });
+    expect(fallbacks.html).toContain("官方已发布 新版本");
+    expect(fallbacks.html).toContain("应用已更新。");
+
+    const failedFallback = renderSettings({
+      4: { currentVersion: "2.7.0", latestVersion: "2.7.0", latestTag: "v2.7.0", releaseUrl: null, hasUpdate: false },
+      5: { available: true, state: "failed", message: null, requestedAt: null, completedAt: null, currentBuildSha: null, targetBuildSha: null },
+      6: false,
+      7: false,
+      8: null,
+    });
+    expect(failedFallback.html).toContain("应用更新失败，请查看服务器日志。");
   });
 
   it("finishes immediately for an anonymous visitor and runs effect cleanup", () => {
@@ -174,6 +295,47 @@ describe("local source-import settings interactions", () => {
 
     expect(view.setters[3]).toHaveBeenCalledWith("加载失败，请刷新重试");
     expect(view.setters[1]).toHaveBeenLastCalledWith(false);
+  });
+
+  it("surfaces an application request failure and disables host updates while signed out", async () => {
+    harness.userState.user = {
+      username: "admin",
+      subscriptionCount: 1,
+      quota: { maxSubscriptions: 9 },
+    };
+    vi.stubGlobal("fetch", vi.fn(async (_url: string, init?: RequestInit) => init?.method === "POST" ? response({}, false) : response({ allowUnsafeSubscriptionSources: false })));
+    const view = renderSettings();
+    const applyButton = view.buttons.find((button) => JSON.stringify(button.children).includes("一键应用已构建更新"));
+    await applyButton?.onClick();
+    expect(view.setters[8]).toHaveBeenCalledWith("提交更新失败，请稍后重试");
+
+    harness.userState.user = null;
+    const signedOut = renderSettings();
+    expect(signedOut.html).toContain("未登录");
+  });
+
+  it("persists and rolls back the unsafe source setting", async () => {
+    harness.userState.user = {
+      username: "admin",
+      subscriptionCount: 1,
+      quota: { maxSubscriptions: 9 },
+    };
+    const fetchMock = vi.fn(async (_url: string, init?: RequestInit) => {
+      if (init?.method === "PATCH") return response({ allowUnsafeSubscriptionSources: true });
+      return response({ allowUnsafeSubscriptionSources: false });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const success = renderSettings();
+    await success.switches[0].onCheckedChange(true);
+    expect(fetchMock).toHaveBeenCalledWith("/api/settings/source-import", expect.objectContaining({ method: "PATCH" }));
+    expect(success.setters[0]).toHaveBeenLastCalledWith(true);
+
+    vi.stubGlobal("fetch", vi.fn(async () => response({}, false)));
+    const failure = renderSettings();
+    await failure.switches[0].onCheckedChange(true);
+    expect(failure.setters[0]).toHaveBeenLastCalledWith(false);
+    expect(failure.setters[3]).toHaveBeenCalledWith("保存失败，请重试");
   });
 
   it("does not update state after the settings effect is cancelled", async () => {
@@ -244,6 +406,24 @@ describe("local source-import settings interactions", () => {
     expect(view.setters[2]).toHaveBeenNthCalledWith(1, true);
     expect(view.setters[2]).toHaveBeenLastCalledWith(false);
     expect(window.location.href).toBe("/login");
+  });
+
+  it("stops nested update polling after unmount", async () => {
+    harness.userState.user = {
+      username: "admin",
+      subscriptionCount: 1,
+      quota: { maxSubscriptions: 9 },
+    };
+    let rejectFetch!: (reason: Error) => void;
+    vi.stubGlobal("fetch", vi.fn(() => new Promise<Response>((_resolve, reject) => {
+      rejectFetch = reject;
+    })));
+
+    const view = renderSettings();
+    for (const cleanup of view.cleanups) cleanup();
+    rejectFetch(new Error("cancelled"));
+    await flushPromises();
+    expect(view.setters[8]).not.toHaveBeenCalledWith("更新状态加载失败，请刷新重试");
   });
 
   it.each([

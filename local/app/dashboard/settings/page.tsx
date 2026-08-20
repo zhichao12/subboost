@@ -6,6 +6,7 @@ import { LogOut, Network, ServerCog, ShieldCheck } from "lucide-react";
 import { Button } from "@subboost/ui/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@subboost/ui/components/ui/card";
 import { SwitchField } from "@subboost/ui/components/ui/switch-field";
+import { AppUpdateCard } from "@local/components/app-update-card";
 import { useUserStore } from "@subboost/ui/store/user-store";
 
 export default function SettingsPage() {
@@ -133,6 +134,8 @@ export default function SettingsPage() {
             {sourceImportError && <p className="text-xs text-red-300">{sourceImportError}</p>}
           </CardContent>
         </Card>
+
+        <AppUpdateCard disabled={!user} />
 
         <Card>
           <CardHeader className="flex flex-row items-center gap-3 space-y-0">
