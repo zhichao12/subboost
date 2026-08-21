@@ -52,26 +52,14 @@ function SwitchField({
           </span>
         ) : null}
       </span>
-      <span className="flex shrink-0 items-center gap-3">
-        <span
-          className={cn(
-            "rounded-full px-2 py-0.5 text-xs font-semibold",
-            checked
-              ? "bg-primary-100 text-primary-700 dark:bg-primary-500/20 dark:text-primary-200"
-              : "bg-slate-200 text-slate-600 dark:bg-white/10 dark:text-white/60"
-          )}
-        >
-          {checked ? "已启用" : "已关闭"}
-        </span>
-        <Switch
-          id={controlId}
-          checked={checked}
-          onCheckedChange={onCheckedChange}
-          disabled={disabled}
-          aria-labelledby={labelId}
-          aria-describedby={descriptionId}
-        />
-      </span>
+      <Switch
+        id={controlId}
+        checked={checked}
+        onCheckedChange={onCheckedChange}
+        disabled={disabled}
+        aria-labelledby={labelId}
+        aria-describedby={descriptionId}
+      />
     </Label>
   );
 }

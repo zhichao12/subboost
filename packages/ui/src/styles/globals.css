@@ -686,3 +686,24 @@ html.light .subboost-button[class*="bg-red-"]:hover {
   background: #fecaca;
   color: #991b1b !important;
 }
+
+/* 开关状态完全由轨道颜色区分，避免亮色主题覆盖 Tailwind data-state 变体。 */
+html.light .switch-control {
+  border-color: #94a3b8 !important;
+  background: #e2e8f0 !important;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.12);
+}
+
+html.light .switch-control[data-state="checked"] {
+  border-color: #2563eb !important;
+  background: #2563eb !important;
+  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.32);
+}
+
+html.light .switch-control > span {
+  background: #475569 !important;
+}
+
+html.light .switch-control[data-state="checked"] > span {
+  background: #ffffff !important;
+}
